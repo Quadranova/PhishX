@@ -84,30 +84,19 @@ Example indicators include:
 * Emotional manipulation
 * Financial coercion
 This ensures transparency and improves cybersecurity awareness among users.
-
-## 📸 Screenshot-Based Scam Detection
-
-PhishX supports screenshot uploads for analyzing:
-
+##  Screenshot-Based Scam Detection
+PhishX supports screenshot uploads for analysing:
 * Chat screenshots
 * SMS captures
 * Email screenshots
 * Fraudulent advertisements
-
 Workflow:
-
 1. OCR extracts textual content from the image
-2. AI analyzes the extracted data
+2. AI analyses the extracted data
 3. A detailed phishing assessment is generated
-
 This improves accessibility for users who may not be comfortable manually copying text.
-
----
-
-## 📊 Pentagon Threat Visualization
-
+##  Pentagon Threat Visualisation
 The platform generates a pentagonal threat graph based on five critical phishing dimensions:
-
 | Dimension | Description                              |
 | --------- | ---------------------------------------- |
 | Urgency   | Pressure to act immediately              |
@@ -117,26 +106,15 @@ The platform generates a pentagonal threat graph based on five critical phishing
 | Intent    | Overall malicious intent                 |
 
 This provides users with a more intuitive understanding of the threat profile.
-
----
-
-## 🛡️ Preventive Recommendations
-
-PhishX provides actionable mitigation steps based on the detected threat level.
-
-Examples include:
-
+## Preventive Recommendations
+PhishX provides actionable mitigation steps based on the detected threat level. Examples include:
 * Changing passwords
 * Enabling two-factor authentication
 * Blocking suspicious senders
 * Avoiding malicious links
 * Contacting banking support
 * Reporting fraudulent activity
-
 The goal is not only detection, but also proactive damage prevention.
-
----
-
 ## 📄 Scam Reporting Assistance
 
 If the calculated risk score is **50 or higher**, users can:
