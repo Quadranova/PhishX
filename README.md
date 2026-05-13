@@ -22,7 +22,7 @@ The platform not only detects potential scams, but also:
 PhishX combines cybersecurity, explainable AI, multilingual accessibility, and user education into a single unified solution.
 
 # Problem Statement
-Modern phishing attacks increasingly rely on:
+Modern phishing attacks increasingly rely on
 * Psychological manipulation
 * Impersonation tactics
 * Urgency-driven messaging
@@ -50,6 +50,10 @@ PhishX addresses these challenges through an AI-driven platform capable of analy
 * Access preventive recommendations
 * Learn about scams through educational modules
 * Report scams more efficiently
+
+# Demo 
+
+# Installation/Setup
 
 # Key Features
 ## 🔍 AI-Based Scam Analyzer
@@ -115,23 +119,15 @@ PhishX provides actionable mitigation steps based on the detected threat level. 
 * Contacting banking support
 * Reporting fraudulent activity
 The goal is not only detection, but also proactive damage prevention.
-## 📄 Scam Reporting Assistance
-
+## Scam Reporting Assistance
 If the calculated risk score is **50 or higher**, users can:
-
 * Copy an AI-generated phishing incident report
 * Automatically open the official Chakshu reporting portal in a new tab
-
 This simplifies and accelerates cybercrime reporting workflows.
 
----
-
 # Additional Platform Modules
-
-## 📚 Scam Awareness Library
-
+##  Scam Awareness Library
 The landing page includes curated awareness resources covering:
-
 * UPI scams
 * OTP fraud
 * Fake job offers
@@ -140,66 +136,41 @@ The landing page includes curated awareness resources covering:
 * Investment fraud
 * Delivery scams
 * Deepfake-related scams
-
 This promotes preventive cybersecurity education.
 
----
-
-## 🎮 Training Lab
-
+##  Training Lab
 The platform includes a gamified cybersecurity learning environment where users can:
-
 * Participate in scam identification challenges
 * Differentiate between safe and malicious messages
 * Earn XP points
 * Improve phishing awareness interactively
 
 This module increases user engagement while reinforcing practical cybersecurity skills.
-
----
-
-## 📖 Scam Encyclopedia
-
+## Scam Encyclopedia
 A dedicated knowledge base allowing users to:
-
 * Explore various scam categories
 * Understand attack methodologies
 * Learn preventive strategies
 * Study real-world phishing examples
 
----
-
-# 🌐 Multilingual Accessibility
-
+#  Multilingual Accessibility
 PhishX currently supports:
-
 * English
 * Hindi
 * Kannada
-
 By supporting regional languages, the platform aims to improve cybersecurity accessibility for a broader audience, including first-time internet users and non-English-speaking communities.
-
----
 
 # System Workflow
 <img width="1380" height="581" alt="WhatsApp Image 2026-05-13 at 15 22 34" src="https://github.com/user-attachments/assets/22d28899-0178-4f20-84d6-d059516cca16" />
 
-
 # Technology Vision
-
-PhishX is designed around the concept of **Explainable AI for Public Cybersecurity**.
-
-The platform focuses on:
-
+PhishX is designed around the concept of **Explainable AI for Public Cybersecurity**. The platform focuses on:
 * Accessibility
 * Simplicity
 * Educational value
 * Real-world applicability
 * User trust
-
 Rather than functioning solely as a detection engine, PhishX aims to create a complete cybersecurity awareness ecosystem.
-
----
 
 # Competitive Advantages
 
@@ -216,12 +187,8 @@ Rather than functioning solely as a detection engine, PhishX aims to create a co
 | Multilingual accessibility      | ✅      |
 | Visual threat analysis          | ✅      |
 
----
-
 # Real-World Applications
-
 PhishX can be applied across:
-
 * Educational institutions
 * Banking awareness programs
 * Public cybersecurity campaigns
@@ -230,28 +197,20 @@ PhishX can be applied across:
 * Community awareness workshops
 
 Target beneficiaries include:
-
 * Students
 * Senior citizens
 * Rural internet users
 * Digital payment users
 * First-time smartphone users
 
----
-
 # Privacy & Security Considerations
-
 PhishX follows a privacy-conscious design approach:
-
 * Uploaded screenshots are not permanently stored
 * Analysis remains session-based
 * Minimal data retention principles are followed
 * User safety and confidentiality remain priorities
 
----
-
 # Future Scope
-
 Planned future enhancements include:
 * Browser extension integration
 * Mobile application deployment
@@ -262,19 +221,12 @@ Planned future enhancements include:
 * Integration with cybersecurity awareness campaigns
 * Adding additional languages in the future
 
-
 # Why PhishX Matters
-
-Cybersecurity tools should not only detect threats — they should empower users to understand and respond to them.
-
-PhishX bridges the gap between:
-
+Cybersecurity tools should not only detect threats, but also empower users to understand and respond to them. PhishX bridges the gap between:
 * Advanced AI-based detection
-  and
 * User-friendly cybersecurity education
 
 The platform combines:
-
 * AI
 * Cybersecurity
 * Accessibility
@@ -282,24 +234,14 @@ The platform combines:
 * User engagement
 * Social impact
 
-into a scalable and practical solution.
-
-
 # Conclusion
-
-PhishX is more than a phishing detection tool.
-
-It is a proactive cybersecurity awareness platform designed to:
-
+PhishX is more than a phishing detection tool. It is a proactive cybersecurity awareness platform designed to:
 * Detect threats
 * Educate users
 * Encourage preventive action
 * Simplify scam reporting
 * Improve digital safety accessibility
-
 By combining intelligent analysis with explainable insights and multilingual support, PhishX aims to make cybersecurity understandable and accessible for everyone.
 
-
-# Detect the scam before it detects you.
-
+# "Detect the scam before it detects you."
 ## PhishX — Team QUADRANOVA
