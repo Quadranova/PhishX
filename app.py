@@ -5,17 +5,12 @@ import os
 app = Flask(__name__)
 
 # --- CONFIGURATION ---
-GEMINI_API_KEY = os.environ.get("GEMINI_API_KEY")
-
-if not GEMINI_API_KEY:
-    raise ValueError("GEMINI_API_KEY not found in environment variables")
-
+GEMINI_API_KEY = "ADD YOUR GEMINI API KEY HERE" 
 client = genai.Client(api_key=GEMINI_API_KEY)
 
 @app.route('/')
 def index():
     return render_template('index.html')
-
 
 @app.route('/analyze', methods=['POST'])
 def analyze():
@@ -31,7 +26,8 @@ def analyze():
 
     try:
         model_id = "gemini-2.5-flash"
-
+        
+        # PROMPT: Structured for the new 2-column card layout and Pentagon Graph
         prompt = f"""
         You are 'PhishX AI'. Analyze this text: "{user_text}"
         
@@ -59,53 +55,42 @@ def analyze():
         SCORE: [0-100]
 
         INSTRUCTIONS: 
-        1. Write in {target_lang}.
-        2. Keep headers in English.
-        3. Be objective.
+        1. Write the content of ANALYSIS, WARNING SIGNS, and PROTECTION in {target_lang}.
+        2. Keep the headers in English.
+        3. Be objective. Routine texts = low score.
         """
-
+        
         response = client.models.generate_content(model=model_id, contents=prompt)
         full_output = response.text
 
+        # Extract Metrics for the Pentagon Graph
         metrics = {"urgency": 50, "technical": 50, "social": 50, "trust": 50, "intent": 50}
-
         try:
             for key in metrics.keys():
                 if key.capitalize() + ":" in full_output:
                     val = full_output.split(key.capitalize() + ":")[1].split('\n')[0]
                     metrics[key] = int(''.join(filter(str.isdigit, val)))
-        except:
-            pass
+        except: pass
 
+        # Extract Score
         score = 50
         if "SCORE:" in full_output:
             try:
                 score_str = full_output.split("SCORE:")[1].strip()
                 score = int(''.join(filter(str.isdigit, score_str)))
-            except:
-                pass
+            except: pass
 
+        # Clean analysis for UI display (Removing Metrics and Score lines)
         clean_text = full_output.split("METRICS:")[0].strip()
 
         return jsonify({
-            "score": score,
+            "score": score, 
             "analysis": clean_text,
             "metrics": metrics
         })
 
     except Exception as e:
-        return jsonify({
-            "score": 60,
-            "analysis": "Error in Analysis.",
-            "metrics": {
-                "urgency": 50,
-                "technical": 50,
-                "social": 50,
-                "trust": 50,
-                "intent": 50
-            }
-        })
-        
-if __name__ == "__main__":
-    port = int(os.environ.get("PORT", 5000))
-    app.run(host="0.0.0.0", port=port)
+        return jsonify({"score": 60, "analysis": "Error in Analysis.", "metrics": metrics})
+
+if __name__ == '__main__':
+    app.run(debug=True)
