@@ -55,7 +55,7 @@ PhishX addresses these challenges through an AI-driven platform capable of analy
 # Installation/Setup
 ## Clone the Repository
 ```bash
-git clone https://github.com/your-username/phishx.git
+git clone https://github.com/QUADRANOVA/PhishX.git
 cd phishx
 ```
 ## Install Dependencies
@@ -77,10 +77,29 @@ The application will run locally at:
 ```txt
 http://127.0.0.1:5000
 ```
+# Tech Stack
+
+## Frontend
+* HTML
+* CSS
+* JavaScript
+
+## Backend
+* Python
+* Flask
+
+## AI & Processing
+* Google Gemini API
+* OCR-based text extraction
+
+## Visualization
+* Pentagon threat analysis graph
+
 
 # Key Features
 ## 🔍 AI-Based Scam Analyzer
 Users can submit:
+
 * SMS messages
 * WhatsApp conversations
 * Emails
