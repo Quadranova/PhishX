@@ -1084,7 +1084,7 @@
     /* ===== XP SYSTEM ===== */
     let totalXP = 0;
     const XP_CORRECT = 25;
-    const XP_WRONG = 5;
+    const XP_WRONG = -5;
     const XP_PER_LEVEL = 100;
 
     function addXP(amount, toastMsg) {
@@ -1146,7 +1146,7 @@
             wrongCount++;
             document.getElementById('wrongCount').innerText = wrongCount;
             result.innerHTML = `<span style="color:#ff7675">❌ Wrong. ${scenarios[sIdx].tip}</span>`;
-            addXP(XP_WRONG, `+${XP_WRONG} XP — Keep Training`);
+            addXP(XP_WRONG, `${XP_WRONG} XP — Incorrect Detection`);
         }
 
         sIdx = (sIdx + 1) % scenarios.length;
