@@ -52,6 +52,8 @@ PhishX addresses these challenges through an AI-driven platform capable of analy
 * Report scams more efficiently
 
 # Demo 
+Demo video of PhishX can be found here -
+https://drive.google.com/file/d/13FzW7yqSC3vCY2dKbARbHkY90reQmnCk/view?usp=sharing
 # Installation/Setup
 ## Clone the Repository
 ```bash
