@@ -1,0 +1,1110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PhishX</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        :root {
+            --bg-gradient: linear-gradient(135deg, #000428, #004e92);
+            --accent: #00d2ff;
+            --card-bg: rgba(255, 255, 255, 0.1);
+            --text-main: #ffffff;
+            --particle-color: rgba(255, 255, 255, 0.5);
+        }
+
+        .theme-mint {
+            --bg-gradient: #0a0f0d;
+            --card-bg: #141c19;
+            --accent: #d637b6d2;
+            --text-main: #e0e6e3;
+            --text-dim: #8a9591;
+            --particle-color: rgba(214, 55, 182, 0.5);
+        }
+
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: rgba(255, 255, 255, 0.05); }
+        ::-webkit-scrollbar-thumb { background: rgba(58, 123, 213, 0.4); border-radius: 10px; }
+
+        body {
+            font-family: 'Segoe UI', sans-serif;
+            background: var(--bg-gradient); 
+            color: var(--text-main);
+            display: flex; flex-direction: column; align-items: center;
+            min-height: 100vh; margin: 0; padding: 20px;
+            overflow-x: hidden;
+            transition: background 0.5s ease;
+        }
+
+        #particleCanvas {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            z-index: -1; pointer-events: none;
+        }
+
+        .container {
+            background: var(--card-bg);
+            backdrop-filter: blur(25px); 
+            padding: 40px; border-radius: 20px;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.5);
+            width: 100%; max-width: 650px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            transition: all 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            position: relative;
+        }
+
+        @keyframes reportShake {
+            0% { transform: translateX(0); }
+            25% { transform: translateX(-2px); }
+            50% { transform: translateX(2px); }
+            75% { transform: translateX(-2px); }
+            100% { transform: translateX(0); }
+        }
+
+        .report-btn {
+            display: block; width: fit-content; margin: 15px auto 0;
+            background: rgba(255,255,255,0.03); border: 1px solid #888; color: #ccc;
+            padding: 8px 16px; border-radius: 20px; font-size: 0.7rem; cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .report-btn:hover { 
+            color: #ff7675; border-color: #ff7675; 
+            box-shadow: 0 0 10px rgba(255, 118, 117, 0.3);
+            animation: reportShake 0.3s infinite;
+        }
+
+        .history-table { width: 100%; border-collapse: separate; border-spacing: 0 10px; }
+        .history-table th { text-align: left; color: #888; font-size: 0.7rem; text-transform: uppercase; padding: 0 10px; }
+        .history-table td { padding: 12px 10px; background: rgba(255,255,255,0.03); font-size: 0.8rem; vertical-align: middle; }
+        .history-table tr td:first-child { border-radius: 8px 0 0 8px; border-left: 3px solid var(--accent); }
+        .history-table tr td:last-child { border-radius: 0 8px 8px 0; }
+        .date-cell { line-height: 1.2; }
+        .date-cell b { display: block; color: var(--accent); font-size: 0.75rem; }
+        .date-cell span { font-size: 0.65rem; color: #aaa; }
+
+        @keyframes criticalPulse {
+            0% { box-shadow: 0 0 20px rgba(255, 118, 117, 0.2); border-color: rgba(255, 118, 117, 0.3); }
+            50% { box-shadow: 0 0 50px rgba(255, 118, 117, 0.6); border-color: rgba(255, 118, 117, 0.8); }
+            100% { box-shadow: 0 0 20px rgba(255, 118, 117, 0.2); border-color: rgba(255, 118, 117, 0.3); }
+        }
+        .critical-alert { animation: criticalPulse 2s infinite !important; }
+
+        .pulsing { box-shadow: 0 0 40px var(--accent); animation: pulse 1.5s infinite; }
+
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.005); }
+            100% { transform: scale(1); }
+        }
+
+        #analyzeBtn, .download-btn { position: relative; overflow: hidden; transition: transform 0.1s active, background 0.3s; }
+        #analyzeBtn:active, .download-btn:active { transform: scale(0.96); }
+        #analyzeBtn::after, .download-btn::after {
+            content: ''; position: absolute; top: -50%; left: -60%;
+            width: 20%; height: 200%; background: rgba(255,255,255,0.2);
+            transform: rotate(30deg); transition: 0s;
+        }
+        #analyzeBtn:hover::after, .download-btn:hover::after { left: 120%; transition: 0.7s; }
+
+        .header-controls { display: flex; justify-content: space-between; margin-bottom: 10px; align-items: center; }
+        .toggle-group { display: flex; gap: 8px; }
+
+        .lang-btn, .theme-btn {
+            background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.15);
+            color: #bdc3c7; font-size: 0.65rem; padding: 4px 10px; border-radius: 5px; cursor: pointer; transition: 0.3s;
+        }
+        .lang-btn.active, .theme-btn.active { background: var(--accent); color: #0f0c29; border-color: var(--accent); font-weight: bold; }
+
+        h1 { text-align: center; color: var(--accent); margin: 0; letter-spacing: 1px; transition: 0.3s; }
+        .subtitle { text-align: center; color: #bdc3c7; margin-bottom: 25px; font-size: 0.9em; opacity: 0.8; }
+
+        .input-wrapper { position: relative; width: 100%; }
+        textarea {
+            width: 100%; height: 120px; background: rgba(0, 0, 0, 0.3);
+            border: 1px solid #444; border-radius: 12px; padding: 15px;
+            padding-right: 45px;
+            color: white; font-size: 16px; resize: none; box-sizing: border-box; outline: none;
+            transition: border 0.3s;
+        }
+        textarea:focus { border-color: var(--accent); }
+        .upload-trigger {
+            position: absolute; right: 15px; top: 15px;
+            background: none; border: none; color: #888;
+            font-size: 1.2rem; cursor: pointer; transition: 0.3s;
+        }
+        .upload-trigger:hover { color: var(--accent); transform: scale(1.1); }
+
+        #analyzeBtn {
+            width: 100%; padding: 15px; background: linear-gradient(to right, #3a7bd5, var(--accent));
+            border: none; border-radius: 10px; color: white; font-weight: bold;
+            font-size: 18px; cursor: pointer; margin-top: 15px;
+        }
+
+        #result { margin-top: 30px; display: none; }
+
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        #cardContainer {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            margin-bottom: 15px;
+        }
+
+        .card {
+            background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 12px; padding: 15px; padding-bottom: 35px;
+            position: relative; line-height: 1.4;
+            animation: fadeInUp 0.6s ease forwards; opacity: 0;
+            font-size: 0.8rem;
+        }
+        .card:hover { background: rgba(255, 255, 255, 0.08); transform: translateY(-3px); border-color: var(--accent); }
+
+        .nested-card-container {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid var(--accent);
+            border-radius: 12px;
+            padding: 15px;
+            position: relative;
+            padding-bottom: 40px;
+        }
+
+        .inner-step-card {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-left: 3px solid var(--accent);
+            border-radius: 8px;
+            padding: 10px 12px;
+            margin-bottom: 8px;
+            font-size: 0.8rem;
+            animation: fadeInLeft 0.5s ease forwards;
+            opacity: 0;
+        }
+
+        @keyframes fadeInLeft {
+            from { opacity: 0; transform: translateX(-15px); }
+            to { opacity: 1; transform: translateX(0); }
+        }
+
+        #verdictBadge {
+            text-align: center; padding: 12px; border-radius: 8px;
+            font-weight: bold; margin-bottom: 25px; text-transform: uppercase;
+            letter-spacing: 1.5px; font-size: 0.85rem; border: 1px solid rgba(255,255,255,0.2);
+        }
+
+        .sub-score-container { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; margin-bottom: 25px; }
+        .sub-score-card {
+            background: rgba(0,0,0,0.25); padding: 10px; border-radius: 8px;
+            text-align: center; border: 1px solid rgba(255,255,255,0.08);
+        }
+        .sub-score-val { display: block; font-weight: bold; font-size: 1.1rem; color: var(--accent); }
+        .sub-score-lab { font-size: 0.6rem; color: #aaa; text-transform: uppercase; }
+
+        .probability-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
+        #percentText { font-size: 1.4rem; font-weight: bold; }
+
+        .meter-container { height: 8px; background: #222; border-radius: 10px; margin-bottom: 30px; overflow: hidden; }
+        .meter-bar { height: 100%; width: 0%; transition: width 2s cubic-bezier(0.1, 0, 0.1, 1); }
+
+        .copy-btn {
+            position: absolute; bottom: 8px; right: 12px;
+            background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2);
+            color: #ddd; font-size: 0.6rem; padding: 3px 8px; border-radius: 4px; cursor: pointer;
+        }
+
+        .extra-section {
+            margin-top: 30px; padding: 20px; border-radius: 12px;
+            background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+        .section-header { font-size: 0.8rem; text-transform: uppercase; color: var(--accent); margin-bottom: 15px; letter-spacing: 1px; }
+
+        .graph-card {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            padding: 15px;
+            margin-top: 15px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .download-btn {
+            width: 100%; padding: 12px; background: rgba(0, 210, 255, 0.1);
+            border: 1px solid var(--accent); border-radius: 10px; color: var(--accent);
+            font-weight: bold; cursor: pointer; margin-top: 10px; margin-bottom: 20px;
+        }
+
+        .shield-network {
+            background: rgba(0, 210, 255, 0.05); border: 1px solid var(--accent);
+            padding: 15px; border-radius: 12px; text-align: center; margin: 20px 0;
+        }
+        .network-val { color: var(--accent); font-weight: bold; font-size: 1.2rem; }
+
+        footer { margin-top: 30px; font-size: 0.75rem; color: rgba(255,255,255,0.45); letter-spacing: 1.5px; }
+
+        #pdf-template {
+            position: absolute; left: -9999px; top: -9999px;
+            width: 800px; background: #0f0c29; color: white; padding: 40px;
+            box-sizing: border-box;
+            display: block; 
+        }
+        .pdf-watermark {
+            position: absolute; top: 50%; left: 50%;
+            transform: translate(-50%, -50%) rotate(-45deg);
+            font-size: 80px; font-weight: bold; color: rgba(255, 255, 255, 0.03);
+            white-space: nowrap; pointer-events: none; z-index: 0;
+            text-transform: uppercase;
+        }
+
+        /* ===== HAMBURGER BUTTON ===== */
+        .hamburger-btn {
+            background: rgba(255,255,255,0.08);
+            border: 1px solid rgba(255,255,255,0.15);
+            color: var(--accent);
+            font-size: 1.2rem;
+            width: 34px; height: 34px;
+            border-radius: 8px;
+            cursor: pointer;
+            display: flex; align-items: center; justify-content: center;
+            transition: 0.3s;
+            flex-shrink: 0;
+            line-height: 1;
+        }
+        .hamburger-btn:hover {
+            background: rgba(0,210,255,0.15);
+            border-color: var(--accent);
+            box-shadow: 0 0 10px rgba(0,210,255,0.2);
+        }
+
+        /* ===== SIDEBAR OVERLAY ===== */
+        #sidebarOverlay {
+            position: fixed; inset: 0; z-index: 999;
+            background: rgba(0,0,0,0.45);
+            backdrop-filter: blur(3px);
+            -webkit-backdrop-filter: blur(3px);
+            opacity: 0; pointer-events: none;
+            transition: opacity 0.35s ease;
+        }
+        #sidebarOverlay.open { opacity: 1; pointer-events: all; }
+
+        /* ===== SIDEBAR PANEL ===== */
+        #sidebar {
+            position: fixed; top: 0; left: -360px; height: 100vh;
+            width: 330px; z-index: 1000;
+            background: rgba(8, 16, 36, 0.75);
+            backdrop-filter: blur(30px) saturate(1.8);
+            -webkit-backdrop-filter: blur(30px) saturate(1.8);
+            border-right: 1px solid rgba(0, 210, 255, 0.2);
+            box-shadow: 10px 0 50px rgba(0,0,0,0.7), inset 1px 0 0 rgba(255,255,255,0.04);
+            transition: left 0.38s cubic-bezier(0.25, 0.8, 0.25, 1);
+            display: flex; flex-direction: column;
+            overflow: hidden;
+        }
+        #sidebar.open { left: 0; }
+
+        /* Subtle inner glow line on sidebar */
+        #sidebar::before {
+            content: '';
+            position: absolute; top: 0; left: 0; right: 0; height: 1px;
+            background: linear-gradient(90deg, transparent, rgba(0,210,255,0.4), transparent);
+        }
+
+        .sidebar-header {
+            padding: 18px 18px 14px;
+            display: flex; justify-content: space-between; align-items: center;
+            border-bottom: 1px solid rgba(255,255,255,0.06);
+        }
+        .sidebar-logo { color: var(--accent); font-size: 0.95rem; font-weight: bold; letter-spacing: 1px; }
+        .sidebar-close {
+            background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1);
+            color: #888; font-size: 0.9rem; width: 28px; height: 28px;
+            border-radius: 6px; cursor: pointer; transition: 0.2s;
+            display: flex; align-items: center; justify-content: center;
+        }
+        .sidebar-close:hover { color: #ff7675; border-color: #ff7675; background: rgba(255,118,117,0.08); }
+
+        .sidebar-tabs {
+            display: flex;
+            border-bottom: 1px solid rgba(255,255,255,0.06);
+        }
+        .sidebar-tab {
+            flex: 1; padding: 11px 0; background: none;
+            border: none; color: #777; font-size: 0.7rem;
+            text-transform: uppercase; letter-spacing: 0.8px;
+            cursor: pointer; transition: 0.25s;
+            border-bottom: 2px solid transparent;
+            margin-bottom: -1px;
+        }
+        .sidebar-tab.active { color: var(--accent); border-bottom-color: var(--accent); }
+        .sidebar-tab:hover:not(.active) { color: #ccc; }
+
+        .sidebar-body {
+            flex: 1; overflow-y: auto; padding: 16px;
+        }
+        .sidebar-body::-webkit-scrollbar { width: 3px; }
+        .sidebar-body::-webkit-scrollbar-thumb { background: rgba(0,210,255,0.2); border-radius: 3px; }
+
+        .sidebar-panel { display: none; }
+        .sidebar-panel.active { display: block; }
+
+        /* ===== XP BAR ===== */
+        .xp-bar-wrap {
+            background: rgba(0,0,0,0.3);
+            border: 1px solid rgba(0,210,255,0.18);
+            border-radius: 10px; padding: 12px 14px;
+            margin-bottom: 14px;
+        }
+        .xp-top-row {
+            display: flex; justify-content: space-between; align-items: center;
+            margin-bottom: 7px;
+        }
+        .xp-label { font-size: 0.6rem; color: #777; text-transform: uppercase; letter-spacing: 0.8px; }
+        .xp-value { font-size: 0.82rem; font-weight: bold; color: var(--accent); }
+        .xp-track { height: 5px; background: rgba(255,255,255,0.07); border-radius: 10px; overflow: hidden; }
+        .xp-fill {
+            height: 100%;
+            background: linear-gradient(to right, #3a7bd5, var(--accent));
+            border-radius: 10px;
+            transition: width 0.9s cubic-bezier(0.25, 0.8, 0.25, 1);
+        }
+
+        @keyframes xpPop {
+            0% { transform: scale(1); }
+            40% { transform: scale(1.2); }
+            100% { transform: scale(1); }
+        }
+        .xp-pop { animation: xpPop 0.35s ease; }
+
+        /* ===== XP TOAST ===== */
+        .xp-toast {
+            position: fixed; top: 22px; left: 50%;
+            transform: translateX(-50%) translateY(-8px);
+            background: rgba(8, 16, 36, 0.92);
+            border: 1px solid var(--accent);
+            color: var(--accent); font-weight: bold; font-size: 0.82rem;
+            padding: 7px 20px; border-radius: 20px; z-index: 1500;
+            backdrop-filter: blur(12px);
+            opacity: 0; pointer-events: none;
+            transition: opacity 0.3s ease, transform 0.3s ease;
+            white-space: nowrap;
+        }
+        .xp-toast.show {
+            opacity: 1;
+            transform: translateX(-50%) translateY(0);
+        }
+
+        /* ===== TRAINING LAB ===== */
+        .training-stats {
+            display: grid; grid-template-columns: 1fr 1fr;
+            gap: 8px; margin-bottom: 14px;
+        }
+        .t-stat-card {
+            background: rgba(0,0,0,0.25);
+            border: 1px solid rgba(255,255,255,0.07);
+            border-radius: 8px; padding: 10px; text-align: center;
+        }
+        .t-stat-val { display: block; font-size: 1rem; font-weight: bold; color: var(--accent); }
+        .t-stat-lab { font-size: 0.58rem; color: #777; text-transform: uppercase; letter-spacing: 0.5px; }
+
+        .training-hint {
+            font-size: 0.6rem; color: #666; text-align: center;
+            margin-bottom: 12px; letter-spacing: 0.4px;
+        }
+
+        .training-card {
+            text-align: center; padding: 16px;
+            background: rgba(0,0,0,0.25); border-radius: 12px;
+            border: 1px dashed rgba(0,210,255,0.35); margin-bottom: 12px;
+            font-size: 0.85rem; line-height: 1.65; color: #ddd;
+            min-height: 70px;
+        }
+
+        .game-btn-group { display: flex; gap: 10px; margin-bottom: 12px; }
+        .g-btn {
+            flex: 1; padding: 11px; border-radius: 10px;
+            border: none; font-weight: bold; font-size: 0.78rem;
+            cursor: pointer; transition: 0.2s; letter-spacing: 0.5px;
+        }
+        .g-btn:active { transform: scale(0.95); }
+        .btn-red { background: #ff7675; color: white; }
+        .btn-red:hover { background: #ff5252; }
+        .btn-green { background: #55efc4; color: black; }
+        .btn-green:hover { background: #2ed9a8; }
+
+        #gameResult {
+            font-weight: bold; text-align: center;
+            min-height: 38px; font-size: 0.78rem;
+            padding: 8px 10px; border-radius: 8px;
+            line-height: 1.5;
+        }
+
+        /* ===== ENCYCLOPEDIA ===== */
+        .enc-item {
+            background: rgba(255,255,255,0.03);
+            border: 1px solid rgba(255,255,255,0.08);
+            border-radius: 10px; margin-bottom: 8px;
+            overflow: hidden; transition: border-color 0.2s;
+        }
+        .enc-item:hover { border-color: rgba(0,210,255,0.25); }
+        .enc-header {
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 11px 13px; cursor: pointer;
+            font-size: 0.78rem; font-weight: 600; color: #ccc;
+            user-select: none; gap: 8px;
+        }
+        .enc-left { display: flex; align-items: center; gap: 7px; flex: 1; min-width: 0; }
+        .enc-title { flex: 1; min-width: 0; }
+        .enc-arrow { font-size: 0.55rem; color: #666; transition: transform 0.25s; flex-shrink: 0; }
+        .enc-item.open .enc-arrow { transform: rotate(180deg); }
+        .enc-body {
+            max-height: 0; overflow: hidden;
+            transition: max-height 0.3s ease, padding 0.3s ease;
+            font-size: 0.73rem; color: #999; line-height: 1.6;
+            padding: 0 13px;
+            border-top: 1px solid transparent;
+        }
+        .enc-item.open .enc-body {
+            max-height: 200px; padding: 11px 13px;
+            border-top-color: rgba(255,255,255,0.05);
+        }
+        .enc-tag {
+            display: inline-block; font-size: 0.52rem; text-transform: uppercase;
+            letter-spacing: 0.7px; padding: 2px 6px; border-radius: 4px;
+            white-space: nowrap; flex-shrink: 0;
+        }
+        .enc-intro {
+            font-size: 0.6rem; color: #666; text-align: center;
+            margin-bottom: 14px; letter-spacing: 0.4px;
+        }
+    </style>
+</head>
+<body>
+
+<canvas id="particleCanvas"></canvas>
+
+<!-- XP Toast -->
+<div class="xp-toast" id="xpToast"></div>
+
+<!-- Sidebar Overlay -->
+<div id="sidebarOverlay" onclick="closeSidebar()"></div>
+
+<!-- Sidebar -->
+<div id="sidebar">
+    <div class="sidebar-header">
+        <span class="sidebar-logo">🛡️ PhishX Labs</span>
+        <button class="sidebar-close" onclick="closeSidebar()">✕</button>
+    </div>
+    <div class="sidebar-tabs">
+        <button class="sidebar-tab active" id="tab-training" onclick="switchSidebarTab('training', this)">🎯 Training</button>
+        <button class="sidebar-tab" id="tab-encyclopedia" onclick="switchSidebarTab('encyclopedia', this)">📖 Encyclopedia</button>
+    </div>
+    <div class="sidebar-body">
+
+        <!-- TRAINING PANEL -->
+        <div class="sidebar-panel active" id="panel-training">
+
+            <div class="xp-bar-wrap">
+                <div class="xp-top-row">
+                    <span class="xp-label">⚡ XP Progress</span>
+                    <span class="xp-value" id="xpDisplay">0 XP</span>
+                </div>
+                <div class="xp-track">
+                    <div class="xp-fill" id="xpFill" style="width:0%"></div>
+                </div>
+            </div>
+
+            <div class="training-stats">
+                <div class="t-stat-card">
+                    <span class="t-stat-val" id="correctCount">0</span>
+                    <span class="t-stat-lab">✅ Correct</span>
+                </div>
+                <div class="t-stat-card">
+                    <span class="t-stat-val" id="wrongCount">0</span>
+                    <span class="t-stat-lab">❌ Wrong</span>
+                </div>
+            </div>
+
+            <div class="training-hint">+25 XP for correct · +5 XP if wrong (still detected)</div>
+
+            <div class="training-card">
+                <p id="scenarioText" style="margin:0;">Loading training module...</p>
+            </div>
+
+            <div class="game-btn-group">
+                <button class="g-btn btn-red" onclick="gameTurn('Scam')">🚨 SCAM</button>
+                <button class="g-btn btn-green" onclick="gameTurn('Real')">✅ REAL</button>
+            </div>
+
+            <div id="gameResult"></div>
+        </div>
+
+        <!-- ENCYCLOPEDIA PANEL -->
+        <div class="sidebar-panel" id="panel-encyclopedia">
+            <div class="enc-intro">TAP ANY ENTRY TO EXPAND</div>
+            <div id="encyclopediaList"></div>
+        </div>
+
+    </div>
+</div>
+
+<!-- ==================== MAIN CONTAINER (ORIGINAL — only header-controls row changed) ==================== -->
+<div class="container" id="mainContainer">
+    <div class="header-controls">
+        <div style="display:flex; gap:8px; align-items:center;">
+            <button class="hamburger-btn" onclick="openSidebar()" title="Open PhishX Labs">☰</button>
+            <div class="toggle-group">
+                <button class="theme-btn active" id="themeDeepSea" onclick="setTheme('deepsea')">Deep Sea</button>
+                <button class="theme-btn" id="themeMint" onclick="setTheme('mint')">Mint Pink</button>
+            </div>
+        </div>
+        <div class="toggle-group">
+            <button class="lang-btn active" onclick="setLang('EN', this)">EN</button>
+            <button class="lang-btn" onclick="setLang('HI', this)">हिन्दी</button>
+            <button class="lang-btn" onclick="setLang('KN', this)">ಕನ್ನಡ</button>
+        </div>
+    </div>
+
+    <h1 id="mainShield">🛡️ PhishX</h1>
+    <p class="subtitle">Detect scams before they detect you.</p>
+
+    <div class="input-wrapper">
+        <textarea id="userInput" placeholder="Please paste suspicious SMS, Emails, Job offers, Payment messages here..."></textarea>
+        <button class="upload-trigger" onclick="document.getElementById('imageInput').click()" title="Upload Image">📷</button>
+        <input type="file" id="imageInput" style="display:none" accept="image/*" onchange="handleImage(this)">
+    </div>
+    
+    <button id="analyzeBtn" onclick="analyzeText()">Analyze message</button>
+
+    <div id="result">
+        <div id="verdictBadge"></div>
+
+        <div class="sub-score-container">
+            <div class="sub-score-card"><span class="sub-score-val" id="urgencyScore">--</span><span class="sub-score-lab">Urgency</span></div>
+            <div class="sub-score-card"><span class="sub-score-val" id="linkScore">--</span><span class="sub-score-lab">Link Safety</span></div>
+            <div class="sub-score-card"><span class="sub-score-val" id="senderScore">--</span><span class="sub-score-lab">Sender Reputation</span></div>
+        </div>
+
+        <div class="probability-header">
+            <h3 style="font-size: 0.9rem; color: #bdc3c7;">Aggregated Risk Probability</h3>
+            <span id="percentText">0%</span>
+        </div>
+        <div class="meter-container"><div id="meter" class="meter-bar"></div></div>
+
+        <div id="cardContainer"></div>
+
+        <div id="protocolSection" style="display:none; margin-top:15px;">
+            <div class="nested-card-container">
+                <div class="section-header">🛡️ How To Protect Yourself</div>
+                <div id="protocolContent"></div>
+                <button class="copy-btn" id="protocolCopyBtn">copy</button>
+            </div>
+        </div>
+
+        <div id="graphSection" style="display:none;">
+            <div class="graph-card">
+                <div class="section-header">📊 Threat Dimension Mapping</div>
+                <div style="width: 280px; height: 280px;">
+                    <canvas id="threatChart"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <div id="proTip" class="pro-tip-text" style="margin-top:15px; font-size:0.8rem; color:var(--accent); text-align:center;"></div>
+
+        <div class="shield-network">
+            <div style="font-size: 0.6rem; text-transform: uppercase; color: #888; margin-bottom: 5px;">Shield Network Live Stats</div>
+            <div class="network-val" id="networkCount">1,402</div>
+            <div style="font-size: 0.7rem; color: var(--accent);">Attempts Blocked in your Region this week</div>
+        </div>
+
+        <button class="download-btn" onclick="downloadPDF()">⬇️ Download Analysis</button>
+        <button class="report-btn" onclick="window.open('https://sancharsaathi.gov.in/sfc', '_blank')">⚠️ Report This Message</button>
+    </div>
+
+    <div class="extra-section">
+        <div class="section-header">💡 SCAM AWARENESS LIBRARY</div>
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; font-size: 0.75rem;">
+            <div style="background: rgba(162, 155, 254, 0.15); padding: 10px; border-radius: 6px; border-left: 3px solid #a29bfe; color: #efefff;">
+                <b>Digital Arrest Scam:</b> Fake CBI/Police video calls claiming you are under "digital arrest." Indian law enforcement never conducts trials over Skype or WhatsApp.
+            </div>
+            <div style="background: rgba(85, 239, 196, 0.15); padding: 10px; border-radius: 6px; border-left: 3px solid #55efc4; color: #dfffee;">
+                <b>UPI Request Scam:</b> "Receive money" requests that actually deduct your balance.
+            </div>
+            <div style="background: rgba(250, 177, 160, 0.15); padding: 10px; border-radius: 6px; border-left: 3px solid #fab1a0; color: #fff0ee;">
+                <b>KYC Update:</b> Urgent threats to block banks/SIM within 24 hours.
+            </div>
+            <div style="background: rgba(129, 236, 236, 0.15); padding: 10px; border-radius: 6px; border-left: 3px solid #81ecec; color: #e0ffff;">
+                <b>Courier Scam:</b> Claims of "illegal items" in parcels. Real customs never demand fees via UPI.
+            </div>
+        </div>
+    </div>
+
+    <div class="extra-section">
+        <div class="section-header">📜 Scan History</div>
+        <table class="history-table" id="historyTable">
+            <thead><tr><th>Date & Time</th><th>Preview</th><th>Risk</th></tr></thead>
+            <tbody id="historyBody"></tbody>
+        </table>
+    </div>
+</div>
+
+<footer>Built by Team QuadraNova</footer>
+
+<div id="pdf-template">
+    <div class="pdf-watermark">PhishX Verified</div>
+    <h1 style="color:#00d2ff; text-align:center; margin-bottom: 20px;">🛡️ PHISHX FORENSIC REPORT</h1>
+    <hr style="border:0.5px solid #444; margin-bottom: 20px;">
+    <div id="pdf-content"></div>
+    <div style="margin-top:50px; text-align:center; color:#888; font-size:12px;">© Team QuadraNova | Verified AI Analysis</div>
+</div>
+
+<script>
+    /* ===== PARTICLES (original, untouched) ===== */
+    const canvas = document.getElementById('particleCanvas');
+    const ctx = canvas.getContext('2d');
+    let particles = [];
+    let scanHistoryData = [];
+
+    function resize() { canvas.width = window.innerWidth; canvas.height = window.innerHeight; }
+    window.addEventListener('resize', resize);
+    resize();
+
+    class Particle {
+        constructor() { this.init(); }
+        init() {
+            this.x = Math.random() * canvas.width;
+            this.y = Math.random() * canvas.height;
+            this.size = Math.random() * 2 + 0.5;
+            this.speedX = Math.random() * 1 - 0.5;
+            this.speedY = Math.random() * 1 - 0.5;
+        }
+        update() {
+            this.x += this.speedX; this.y += this.speedY;
+            if (this.x > canvas.width) this.x = 0;
+            if (this.x < 0) this.x = canvas.width;
+            if (this.y > canvas.height) this.y = 0;
+            if (this.y < 0) this.y = canvas.height;
+        }
+        draw() {
+            ctx.fillStyle = getComputedStyle(document.documentElement).getPropertyValue('--particle-color');
+            ctx.beginPath();
+            ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2); ctx.fill();
+        }
+    }
+
+    function initParticles() { 
+        particles = [];
+        for (let i = 0; i < 80; i++) particles.push(new Particle()); 
+    }
+    function animateParticles() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        particles.forEach(p => { p.update(); p.draw(); });
+        requestAnimationFrame(animateParticles);
+    }
+    initParticles(); animateParticles();
+
+    /* ===== THEME & LANG (original, untouched) ===== */
+    function setTheme(theme) {
+        const root = document.documentElement;
+        document.getElementById('themeDeepSea').classList.remove('active');
+        document.getElementById('themeMint').classList.remove('active');
+        if (theme === 'mint') {
+            root.classList.add('theme-mint');
+            document.getElementById('themeMint').classList.add('active');
+        } else {
+            root.classList.remove('theme-mint');
+            document.getElementById('themeDeepSea').classList.add('active');
+        }
+    }
+
+    let currentLang = 'EN';
+    const scanLabels = ["🔍 Scanning URL...", "🚩 Checking Urgency...", "🌐 Checking Database...", "🤖 Consulting AI..."];
+
+    function setLang(lang, btn) {
+        currentLang = lang;
+        document.querySelectorAll('.lang-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+    }
+
+    function handleImage(input) {
+        if (input.files && input.files[0]) {
+            document.getElementById('userInput').value = "[Image Selected: " + input.files[0].name + "] (AI Scanning Visual Data...)";
+        }
+    }
+
+    function animateValue(id, start, end, duration) {
+        let obj = document.getElementById(id);
+        if(!obj) return;
+        let startTimestamp = null;
+        const step = (timestamp) => {
+            if (!startTimestamp) startTimestamp = timestamp;
+            const progress = Math.min((timestamp - startTimestamp) / duration, 1);
+            obj.innerHTML = Math.floor(progress * (end - start) + start) + (id.includes('Score') ? "" : "%");
+            if (progress < 1) window.requestAnimationFrame(step);
+        };
+        window.requestAnimationFrame(step);
+    }
+
+    function copyText(text, btn) {
+        navigator.clipboard.writeText(text);
+        btn.innerText = "COPIED";
+        setTimeout(() => btn.innerText = "copy", 1500);
+    }
+
+    /* ===== CHART LOGIC (original, untouched) ===== */
+    let myChart = null;
+    function renderRadar(currentMetrics, history = []) {
+        const ctxChart = document.getElementById('threatChart').getContext('2d');
+        if (myChart) myChart.destroy();
+        const avg = { u: 0, t: 0, s: 0, tr: 0, m: 0 };
+        history.forEach(h => {
+            avg.u += h.urgency; avg.t += h.technical; avg.s += h.social; avg.tr += h.trust; avg.m += h.intent;
+        });
+        const count = history.length || 1;
+        myChart = new Chart(ctxChart, {
+            type: 'radar',
+            data: {
+                labels: ['Urgency', 'Technical', 'Social', 'Trust', 'Intent'],
+                datasets: [
+                    {
+                        label: 'Current Scan',
+                        data: [currentMetrics.urgency, currentMetrics.technical, currentMetrics.social, currentMetrics.trust, currentMetrics.intent],
+                        backgroundColor: 'rgba(0, 210, 255, 0.3)',
+                        borderColor: '#00d2ff',
+                        borderWidth: 3,
+                        pointBackgroundColor: '#00d2ff',
+                        pointRadius: 4
+                    },
+                    {
+                        label: 'Trend Average',
+                        data: [avg.u/count, avg.t/count, avg.s/count, avg.tr/count, avg.m/count],
+                        backgroundColor: 'rgba(255, 255, 255, 0.05)',
+                        borderColor: 'rgba(255, 255, 255, 0.2)',
+                        borderWidth: 1,
+                        borderDash: [5, 5] 
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    r: {
+                        angleLines: { color: 'rgba(255, 255, 255, 0.1)' },
+                        grid: { color: 'rgba(255, 255, 255, 0.1)' },
+                        pointLabels: { color: '#8a9591', font: { size: 10 } },
+                        ticks: { display: false },
+                        suggestedMin: 0, suggestedMax: 100
+                    }
+                },
+                plugins: {
+                    legend: { display: true, labels: { color: '#8a9591', font: { size: 9 } } }
+                }
+            }
+        });
+    }
+
+    /* ===== ANALYZE (original, untouched) ===== */
+    async function analyzeText() {
+        const input = document.getElementById('userInput').value;
+        const btn = document.getElementById('analyzeBtn');
+        const cardContainer = document.getElementById('cardContainer');
+        const resultDiv = document.getElementById('result');
+        const meter = document.getElementById('meter');
+        const container = document.getElementById('mainContainer');
+        const badge = document.getElementById('verdictBadge');
+        const proTip = document.getElementById('proTip');
+        const protocolSection = document.getElementById('protocolSection');
+        const protocolContent = document.getElementById('protocolContent');
+        const protocolCopyBtn = document.getElementById('protocolCopyBtn');
+        const graphSection = document.getElementById('graphSection');
+
+        if (!input.trim()) return;
+
+        let labelIdx = 0;
+        const labelInterval = setInterval(() => {
+            btn.innerText = scanLabels[labelIdx % scanLabels.length];
+            labelIdx++;
+        }, 500);
+
+        btn.disabled = true;
+        container.classList.add('pulsing');
+
+        try {
+            const response = await fetch('/analyze', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({text: input, language: currentLang}) 
+            });
+
+            const data = await response.json();
+            clearInterval(labelInterval);
+            resultDiv.style.display = 'block';
+
+            if (data.score > 75) container.classList.add('critical-alert');
+            else container.classList.remove('critical-alert');
+            
+            cardContainer.innerHTML = ''; 
+
+            const sections = data.analysis.split(/(?=🔍|🚩|🛡️|💡|🚨)/g).filter(s => s.trim());
+            let analysisContent = "";
+            let warningContent = "";
+            let foundTip = "";
+            let foundProtocol = "";
+
+            sections.forEach((section) => {
+                const cleanText = section.trim().replace(/\*\*/g, '').replace(/^Step:\s*/i, '');
+                if (cleanText.includes('💡')) foundTip = cleanText;
+                else if (cleanText.includes('🚨')) foundProtocol = cleanText.replace('🚨', '').replace('Emergency Protocol If Link Clicked', '').trim();
+                else if (cleanText.includes('🔍') || cleanText.includes('🛡️')) analysisContent += cleanText.replace(/[🔍🛡️]/g, '') + "\n";
+                else if (cleanText.includes('🚩')) warningContent += cleanText.replace('🚩', '') + "\n";
+            });
+
+            const aCard = document.createElement('div');
+            aCard.className = 'card';
+            aCard.innerHTML = `<b style="color:var(--accent); display:block; margin-bottom:8px;">AI Forensic Analysis</b><div style="font-size:0.75rem;">${analysisContent || 'Analyzing pattern matching...'}</div>`;
+            const aCp = document.createElement('button');
+            aCp.className = 'copy-btn'; aCp.innerText = 'copy';
+            aCp.onclick = () => copyText(analysisContent, aCp);
+            aCard.appendChild(aCp);
+            cardContainer.appendChild(aCard);
+
+            const wCard = document.createElement('div');
+            wCard.className = 'card';
+            wCard.innerHTML = `<b style="color:#ff7675; display:block; margin-bottom:8px;">Warning Signs</b><div style="font-size:0.75rem;">${warningContent || 'No immediate malicious patterns detected.'}</div>`;
+            const wCp = document.createElement('button');
+            wCp.className = 'copy-btn'; wCp.innerText = 'copy';
+            wCp.onclick = () => copyText(warningContent, wCp);
+            wCard.appendChild(wCp);
+            cardContainer.appendChild(wCard);
+
+            protocolContent.innerHTML = "";
+            const pText = foundProtocol || "Disconnect internet immediately.\nChange bank/email passwords.\nReport to cybercrime portal.";
+            const lines = pText.split('\n').filter(l => l.trim());
+            lines.forEach((line, i) => {
+                const inner = document.createElement('div');
+                inner.className = 'inner-step-card';
+                inner.style.animationDelay = (i * 0.15) + 's';
+                inner.innerText = line.replace(/[•*-]/, '').trim();
+                protocolContent.appendChild(inner);
+            });
+            protocolSection.style.display = 'block';
+            protocolCopyBtn.onclick = () => copyText(pText, protocolCopyBtn);
+
+            graphSection.style.display = 'block';
+            const metrics = data.metrics || { 
+                urgency: data.score, 
+                technical: Math.random() * 100, 
+                social: Math.random() * 100, 
+                trust: Math.random() * 100, 
+                intent: data.score > 50 ? 80 : 20 
+            };
+            renderRadar(metrics, scanHistoryData);
+            scanHistoryData.push(metrics);
+
+            proTip.innerText = foundTip || "💡 Pro Tip: Verify all sources before clicking links.";
+
+            const score = data.score;
+            animateValue("percentText", 0, score, 2000);
+            animateValue("urgencyScore", 0, Math.min(score + 10, 100), 1500);
+            animateValue("linkScore", 0, Math.max(100 - score, 5), 1500);
+            animateValue("senderScore", 0, Math.max(score - 15, 10), 1500);
+
+            if (score > 75) {
+                badge.innerText = "🚨 High Alert: Potential Fraud";
+                badge.style.color = "#ff7675"; badge.style.background = "rgba(255, 118, 117, 0.15)";
+            } else if (score > 40) {
+                badge.innerText = "⚠️ Caution: Suspicious Activity";
+                badge.style.color = "#fdcb6e"; badge.style.background = "rgba(253, 203, 110, 0.15)";
+            } else {
+                badge.innerText = "✅ Verified: Safe to Proceed";
+                badge.style.color = "#55efc4"; badge.style.background = "rgba(85, 239, 196, 0.15)";
+            }
+
+            setTimeout(() => {
+                meter.style.width = score + '%';
+                meter.style.background = score > 75 ? '#ff7675' : (score > 40 ? '#fdcb6e' : '#55efc4');
+            }, 100);
+
+            const historyBody = document.getElementById('historyBody');
+            const now = new Date();
+            const row = `<tr><td class="date-cell"><b>${now.toLocaleDateString()}</b><span>${now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span></td><td>${input.substring(0,12)}...</td><td>${score}%</td></tr>`;
+            historyBody.insertAdjacentHTML('afterbegin', row);
+
+        } catch (err) { alert("Error connecting to AI server!"); } finally {
+            btn.innerText = "Analyze message"; btn.disabled = false;
+            container.classList.remove('pulsing');
+        }
+    }
+
+    /* ===== PDF DOWNLOAD (original, untouched) ===== */
+    async function downloadPDF() {
+        const { jsPDF } = window.jspdf;
+        const temp = document.getElementById('pdf-template');
+        const content = document.getElementById('pdf-content');
+        let breakdownHTML = "";
+        document.querySelectorAll('#cardContainer .card').forEach((card) => {
+            let txt = card.innerText.replace('copy', '').trim();
+            breakdownHTML += `<div style="margin-bottom:12px; color:#ffffff !important; font-size:14px; border-left: 2px solid #00d2ff; padding-left:10px;">${txt}</div>`;
+        });
+        let emergencyHTML = "";
+        document.querySelectorAll('#protocolContent .inner-step-card').forEach((inner) => {
+            emergencyHTML += `<div style="margin-bottom:8px; color:#ff7675 !important; font-size:14px;">▶ ${inner.innerText}</div>`;
+        });
+        content.innerHTML = `
+            <div style="background:rgba(255,255,255,0.05); padding:20px; border:1px solid #00d2ff; border-radius:10px; margin-bottom:20px;">
+                <h2 style="color:#00d2ff !important; margin:0 0 10px 0;">Dossier ID: #PH-${Math.floor(Math.random()*90000)}</h2>
+                <p style="color:#ffffff !important; margin:5px 0; font-size:16px;"><b>Threat Level:</b> ${document.getElementById('percentText').innerText} Probability</p>
+                <p style="color:#ffffff !important; margin:5px 0; font-size:16px;"><b>Verdict:</b> ${document.getElementById('verdictBadge').innerText}</p>
+            </div>
+            <h3 style="color:#00d2ff !important; border-bottom:1px solid #333; padding-bottom:5px;">AI Forensic Breakdown:</h3>
+            <div>${breakdownHTML}</div>
+            <div style="margin-top:30px; background:rgba(255,118,117,0.1); border:1px solid #ff7675; padding:20px; border-radius:10px;">
+                <h3 style="color:#ff7675 !important; margin-top:0;">🚨 Recommended Actions:</h3>
+                <div>${emergencyHTML}</div>
+            </div>
+        `;
+        setTimeout(async () => {
+            const canvasImg = await html2canvas(temp, { scale: 2, backgroundColor: "#0f0c29" });
+            const imgData = canvasImg.toDataURL('image/png');
+            const pdf = new jsPDF('p', 'mm', 'a4');
+            const pdfWidth = pdf.internal.pageSize.getWidth();
+            const pdfHeight = (canvasImg.height * pdfWidth) / canvasImg.width;
+            pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, pdfHeight);
+            pdf.save('PhishX_Forensic_Report.pdf');
+        }, 100);
+    }
+
+    /* ===== SIDEBAR ===== */
+    function openSidebar() {
+        document.getElementById('sidebar').classList.add('open');
+        document.getElementById('sidebarOverlay').classList.add('open');
+    }
+    function closeSidebar() {
+        document.getElementById('sidebar').classList.remove('open');
+        document.getElementById('sidebarOverlay').classList.remove('open');
+    }
+    function switchSidebarTab(tab, btn) {
+        document.querySelectorAll('.sidebar-tab').forEach(t => t.classList.remove('active'));
+        document.querySelectorAll('.sidebar-panel').forEach(p => p.classList.remove('active'));
+        btn.classList.add('active');
+        document.getElementById('panel-' + tab).classList.add('active');
+    }
+
+    /* ===== XP SYSTEM ===== */
+    let totalXP = 0;
+    const XP_CORRECT = 25;
+    const XP_WRONG = 5;
+    const XP_PER_LEVEL = 100;
+
+    function addXP(amount, toastMsg) {
+        totalXP += amount;
+        const xpDisplay = document.getElementById('xpDisplay');
+        const xpFill = document.getElementById('xpFill');
+        xpDisplay.innerText = totalXP + ' XP';
+        xpDisplay.classList.remove('xp-pop');
+        void xpDisplay.offsetWidth;
+        xpDisplay.classList.add('xp-pop');
+        const fillPct = (totalXP % XP_PER_LEVEL) / XP_PER_LEVEL * 100;
+        xpFill.style.width = fillPct + '%';
+        showXPToast(toastMsg);
+    }
+
+    function showXPToast(msg) {
+        const toast = document.getElementById('xpToast');
+        toast.innerText = msg;
+        toast.classList.add('show');
+        clearTimeout(toast._hideTimer);
+        toast._hideTimer = setTimeout(() => toast.classList.remove('show'), 2200);
+    }
+
+    /* ===== TRAINING LAB ===== */
+    const scenarios = [
+        { text: "SMS: 'Your electricity will be disconnected tonight. Pay pending bill at 98xx-xxxx.'", ans: "Scam", tip: "Utility companies don't use personal mobile numbers for payment." },
+        { text: "Email: 'Amazon: Your account is locked. Log in here to verify: secure-amazon-check.com'", ans: "Scam", tip: "Look at the domain — it is not amazon.com." },
+        { text: "Email from HR: 'The 2026 Holiday Calendar is now live on the internal portal.'", ans: "Real", tip: "Standard company procedure with no urgent threats." },
+        { text: "WhatsApp: 'Congrats! You won ₹50,000 in KBC Lucky Draw. Send ₹499 processing fee to claim.'", ans: "Scam", tip: "Legitimate prizes never require upfront fees to claim." },
+        { text: "Bank SMS: 'INR 2,500 debited from A/c XX4821 on 15-May. Avl Bal: INR 18,340. - SBI'", ans: "Real", tip: "Standard transaction alert with masked account number." },
+        { text: "Email: 'Your HDFC account will be suspended. Update KYC now: hdfc-kyc-update.net'", ans: "Scam", tip: "Banks always use their official domain. This URL is fake." },
+        { text: "SMS: 'Your OTP for net banking login is 847291. Do not share with anyone. - SBI'", ans: "Real", tip: "Legitimate OTPs always warn you not to share them." },
+        { text: "Telegram: 'Work from home — like 10 YouTube videos/day, earn ₹5,000. Deposit ₹2,000 to start.'", ans: "Scam", tip: "Job task scams pay small amounts first, then demand a deposit." }
+    ];
+
+    let sIdx = 0;
+    let correctCount = 0;
+    let wrongCount = 0;
+    let gameActive = true;
+
+    function loadScenario() {
+        document.getElementById('scenarioText').innerText = scenarios[sIdx].text;
+        document.getElementById('gameResult').innerText = "";
+        gameActive = true;
+    }
+
+    function gameTurn(choice) {
+        if (!gameActive) return;
+        gameActive = false;
+        const result = document.getElementById('gameResult');
+        const isCorrect = (choice === scenarios[sIdx].ans);
+
+        if (isCorrect) {
+            correctCount++;
+            document.getElementById('correctCount').innerText = correctCount;
+            result.innerHTML = `<span style="color:#55efc4">✅ Correct! ${scenarios[sIdx].tip}</span>`;
+            addXP(XP_CORRECT, `+${XP_CORRECT} XP — Threat Detected!`);
+        } else {
+            wrongCount++;
+            document.getElementById('wrongCount').innerText = wrongCount;
+            result.innerHTML = `<span style="color:#ff7675">❌ Wrong. ${scenarios[sIdx].tip}</span>`;
+            addXP(XP_WRONG, `+${XP_WRONG} XP — Keep Training`);
+        }
+
+        sIdx = (sIdx + 1) % scenarios.length;
+        setTimeout(loadScenario, 3000);
+    }
+
+    /* ===== ENCYCLOPEDIA ===== */
+    const encyclopediaData = [
+        { title: "Phishing & Spoofing", tag: "High Risk", tagColor: "#ff7675", desc: "Creation of fake websites or emails that look exactly like banks (SBI, HDFC) or services (Netflix, Google). They steal credentials by mimicking trusted brands with convincing lookalike domains." },
+        { title: "Social Engineering", tag: "Psychological", tagColor: "#a29bfe", desc: "Psychological manipulation where attackers pretend to be friends, family or officials in distress to extract money, OTPs, or sensitive personal data." },
+        { title: "Lottery & Prize Fraud", tag: "Financial", tagColor: "#fdcb6e", desc: "Promising large sums of money for a small 'processing fee' or 'GST payment'. If you actually won something, you would never need to pay to receive it." },
+        { title: "Remote Access Scams", tag: "Tech Exploit", tagColor: "#00d2ff", desc: "Asking you to download apps like AnyDesk or TeamViewer to 'fix' your phone or PC, while silently stealing your banking data and live OTPs." },
+        { title: "Job & Task Scams", tag: "Financial", tagColor: "#fdcb6e", desc: "Paying users small amounts for 'liking YouTube videos' then asking for large deposits before suddenly disappearing with all the money." },
+        { title: "Digital Arrest Scam", tag: "Impersonation", tagColor: "#fab1a0", desc: "Fake CBI/Police/ED video calls claiming you are under 'digital arrest'. Indian law enforcement NEVER conducts arrests or trials over Skype, WhatsApp or Zoom." },
+        { title: "UPI Request Fraud", tag: "Financial", tagColor: "#55efc4", desc: "'Receive money' UPI requests that actually debit your account when you enter your PIN. Remember: entering your UPI PIN is always a PAYMENT, never a receipt." },
+        { title: "KYC Update Scam", tag: "Urgency Tactic", tagColor: "#e17055", desc: "Urgent threats to block your bank account or SIM within 24 hours unless you update KYC via a suspicious link. Real banks only update KYC through official branches." }
+    ];
+
+    function loadEncyclopedia() {
+        const list = document.getElementById('encyclopediaList');
+        if (list.children.length > 0) return;
+        encyclopediaData.forEach((item) => {
+            const el = document.createElement('div');
+            el.className = 'enc-item';
+            el.innerHTML = `
+                <div class="enc-header" onclick="this.parentElement.classList.toggle('open')">
+                    <div class="enc-left">
+                        <span class="enc-tag" style="background:${item.tagColor}22; color:${item.tagColor}; border:1px solid ${item.tagColor}44;">${item.tag}</span>
+                        <span class="enc-title">${item.title}</span>
+                    </div>
+                    <span class="enc-arrow">▼</span>
+                </div>
+                <div class="enc-body">${item.desc}</div>
+            `;
+            list.appendChild(el);
+        });
+    }
+
+    /* ===== INIT ===== */
+    loadScenario();
+    loadEncyclopedia();
+</script>
+</body>
+</html>
