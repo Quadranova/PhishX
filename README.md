@@ -52,8 +52,31 @@ PhishX addresses these challenges through an AI-driven platform capable of analy
 * Report scams more efficiently
 
 # Demo 
-
 # Installation/Setup
+## Clone the Repository
+```bash
+git clone https://github.com/your-username/phishx.git
+cd phishx
+```
+## Install Dependencies
+```bash
+pip install -r requirements.txt
+```
+## Configure API Key
+Open `app.py` and replace:
+```python
+GEMINI_API_KEY = "ADD YOUR GEMINI API KEY HERE"
+```
+with your actual Gemini API key.
+
+## Run the Application
+```bash
+python app.py
+```
+The application will run locally at:
+```txt
+http://127.0.0.1:5000
+```
 
 # Key Features
 ## 🔍 AI-Based Scam Analyzer
