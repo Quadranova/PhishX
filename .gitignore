@@ -11,10 +11,19 @@ env/
 
 # Environment variables
 .env
+.env.*
 
 # Flask stuff
 instance/
 .webassets-cache
+*.sqlite3
+*.db
+
+# Uploads (important for OCR/screenshot apps)
+uploads/
+*.png
+*.jpg
+*.jpeg
 
 # VS Code
 .vscode/
@@ -32,6 +41,12 @@ Thumbs.db
 # Build files
 dist/
 build/
+*.egg-info/
+.eggs/
 
 # Temporary files
 *.tmp
+
+# Vim swap files
+*.swp
+*.swo
