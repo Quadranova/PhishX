@@ -947,38 +947,121 @@
     /* ===== PDF DOWNLOAD (original, untouched) ===== */
     async function downloadPDF() {
         const { jsPDF } = window.jspdf;
+
         const temp = document.getElementById('pdf-template');
         const content = document.getElementById('pdf-content');
+
         let breakdownHTML = "";
+
         document.querySelectorAll('#cardContainer .card').forEach((card) => {
             let txt = card.innerText.replace('copy', '').trim();
-            breakdownHTML += `<div style="margin-bottom:12px; color:#ffffff !important; font-size:14px; border-left: 2px solid #00d2ff; padding-left:10px;">${txt}</div>`;
+
+            breakdownHTML += `
+                <div style="
+                    margin-bottom:12px;
+                    color:#ffffff !important;
+                    font-size:14px;
+                    border-left: 2px solid #00d2ff;
+                    padding-left:10px;
+                ">
+                    ${txt}
+                </div>
+            `;
         });
+
         let emergencyHTML = "";
+
         document.querySelectorAll('#protocolContent .inner-step-card').forEach((inner) => {
-            emergencyHTML += `<div style="margin-bottom:8px; color:#ff7675 !important; font-size:14px;">▶ ${inner.innerText}</div>`;
+            emergencyHTML += `
+                <div style="
+                    margin-bottom:8px;
+                    color:#ff7675 !important;
+                    font-size:14px;
+                ">
+                    ▶ ${inner.innerText}
+                </div>
+            `;
         });
+
         content.innerHTML = `
-            <div style="background:rgba(255,255,255,0.05); padding:20px; border:1px solid #00d2ff; border-radius:10px; margin-bottom:20px;">
-                <h2 style="color:#00d2ff !important; margin:0 0 10px 0;">Dossier ID: #PH-${Math.floor(Math.random()*90000)}</h2>
-                <p style="color:#ffffff !important; margin:5px 0; font-size:16px;"><b>Threat Level:</b> ${document.getElementById('percentText').innerText} Probability</p>
-                <p style="color:#ffffff !important; margin:5px 0; font-size:16px;"><b>Verdict:</b> ${document.getElementById('verdictBadge').innerText}</p>
+            <div style="
+                background:rgba(255,255,255,0.05);
+                padding:20px;
+                border:1px solid #00d2ff;
+                border-radius:10px;
+                margin-bottom:20px;
+            ">
+                <h2 style="color:#00d2ff !important; margin:0 0 10px 0;">
+                    🛡️ Dossier ID: #PH-${Math.floor(Math.random()*90000)}
+                </h2>
+
+                <p style="color:#ffffff !important; margin:5px 0; font-size:16px;">
+                    <b>Threat Level:</b> ${document.getElementById('percentText').innerText} Probability
+                </p>
+
+                <p style="color:#ffffff !important; margin:5px 0; font-size:16px;">
+                    <b>Verdict:</b> ${document.getElementById('verdictBadge').innerText}
+                </p>
             </div>
-            <h3 style="color:#00d2ff !important; border-bottom:1px solid #333; padding-bottom:5px;">AI Forensic Breakdown:</h3>
+
+            <h3 style="
+                color:#00d2ff !important;
+                border-bottom:1px solid #333;
+                padding-bottom:5px;
+            ">
+                AI Forensic Breakdown:
+            </h3>
+
             <div>${breakdownHTML}</div>
-            <div style="margin-top:30px; background:rgba(255,118,117,0.1); border:1px solid #ff7675; padding:20px; border-radius:10px;">
-                <h3 style="color:#ff7675 !important; margin-top:0;">🚨 Recommended Actions:</h3>
+
+            <div style="
+                margin-top:30px;
+                background:rgba(255,118,117,0.1);
+                border:1px solid #ff7675;
+                padding:20px;
+                border-radius:10px;
+            ">
+                <h3 style="color:#ff7675 !important; margin-top:0;">
+                    🚨 Recommended Actions:
+                </h3>
+
                 <div>${emergencyHTML}</div>
             </div>
         `;
+
         setTimeout(async () => {
-            const canvasImg = await html2canvas(temp, { scale: 2, backgroundColor: "#0f0c29" });
+
+            const canvasImg = await html2canvas(temp, {
+                scale: 2,
+                backgroundColor: "#0f0c29",
+                useCORS: true
+            });
+
             const imgData = canvasImg.toDataURL('image/png');
+
             const pdf = new jsPDF('p', 'mm', 'a4');
+
             const pdfWidth = pdf.internal.pageSize.getWidth();
-            const pdfHeight = (canvasImg.height * pdfWidth) / canvasImg.width;
-            pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, pdfHeight);
+            const pdfHeight = pdf.internal.pageSize.getHeight();
+
+            const imgWidth = pdfWidth;
+            const imgHeight = (canvasImg.height * imgWidth) / canvasImg.width;
+
+            // Dark background fill
+            pdf.setFillColor(15, 12, 41);
+            pdf.rect(0, 0, pdfWidth, pdfHeight, 'F');
+
+            let yPosition = 0;
+
+            // Center content if smaller than page
+            if (imgHeight < pdfHeight) {
+                yPosition = (pdfHeight - imgHeight) / 2;
+            }
+
+            pdf.addImage(imgData, 'PNG', 0, yPosition, imgWidth, imgHeight);
+
             pdf.save('PhishX_Forensic_Report.pdf');
+
         }, 100);
     }
 
