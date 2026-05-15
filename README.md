@@ -56,7 +56,7 @@ PhishX addresses these challenges through an AI-driven platform capable of analy
 https://drive.google.com/file/d/13FzW7yqSC3vCY2dKbARbHkY90reQmnCk/view?usp=sharing
 
 # Sample scam inputs
-Note: The project is fully functional and tested locally. Deployment is planned as a future enhancement.
+### NOTE: The project is fully functional and tested locally. Deployment is planned as a future enhancement.
 
 1. Dear Customer, your SBI account will be permanently blocked within 2 hours due to incomplete KYC verification. Click here immediately to update your PAN and Aadhaar details:
 http://sbi-secure-verify-login.com
