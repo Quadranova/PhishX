@@ -54,6 +54,25 @@ PhishX addresses these challenges through an AI-driven platform capable of analy
 # Demo 
 🎥 [Watch the PhishX Demo Video]
 https://drive.google.com/file/d/13FzW7yqSC3vCY2dKbARbHkY90reQmnCk/view?usp=sharing
+
+# Sample scam inputs
+Note: The project is fully functional and tested locally. Deployment is planned as a future enhancement.
+
+1. Dear Customer, your SBI account will be permanently blocked within 2 hours due to incomplete KYC verification. Click here immediately to update your PAN and Aadhaar details:
+http://sbi-secure-verify-login.com
+Failure to comply may result in account suspension.
+
+2. प्रिय ग्राहक, आपका बैंक खाता 24 घंटे के अंदर बंद कर दिया जाएगा क्योंकि आपका KYC अधूरा है। तुरंत अपना आधार और पैन अपडेट करने के लिए नीचे दिए गए लिंक पर क्लिक करें:
+http://secure-kyc-update-bank.in
+ध्यान दें: सत्यापन नहीं करने पर आपका खाता फ्रीज कर दिया जाएगा।
+
+3. ಪ್ರಿಯ ಗ್ರಾಹಕರೇ, ನಿಮ್ಮ ಬ್ಯಾಂಕ್ KYC ಪರಿಶೀಲನೆ ಪೂರ್ಣಗೊಂಡಿಲ್ಲ. 2 ಗಂಟೆಗಳೊಳಗೆ ಪರಿಶೀಲನೆ ಮಾಡದಿದ್ದರೆ ನಿಮ್ಮ ಖಾತೆಯನ್ನು ತಾತ್ಕಾಲಿಕವಾಗಿ ಬಂದ್ ಮಾಡಲಾಗುತ್ತದೆ.
+ತಕ್ಷಣ ಪರಿಶೀಲಿಸಲು ಕೆಳಗಿನ ಲಿಂಕ್ ಕ್ಲಿಕ್ ಮಾಡಿ:
+http://secure-bank-verification.in
+
+4. <img width="501" height="617" alt="image" src="https://github.com/user-attachments/assets/8e9d1fe0-b7da-43eb-9740-877648c4e622" />
+
+
 # Installation/Setup
 ## Clone the Repository
 ```bash
