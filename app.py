@@ -5,7 +5,7 @@ import os
 app = Flask(__name__)
 
 # --- CONFIGURATION ---
-GEMINI_API_KEY = "AIzaSyAZbPE_HLOx4wQAHqCBKj5zEmwY4o33HMk" 
+GEMINI_API_KEY = "ADD YOUR GEMINI API KEY HERE" 
 client = genai.Client(api_key=GEMINI_API_KEY)
 
 @app.route('/')
