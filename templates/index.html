@@ -554,7 +554,7 @@
     </div>
 </div>
 
-<!-- ==================== MAIN CONTAINER (ORIGINAL — only header-controls row changed) ==================== -->
+<!-- ==================== MAIN CONTAINER ==================== -->
 <div class="container" id="mainContainer">
     <div class="header-controls">
         <div style="display:flex; gap:8px; align-items:center;">
@@ -666,7 +666,7 @@
 </div>
 
 <script>
-    /* ===== PARTICLES (original, untouched) ===== */
+    /* ===== PARTICLES ===== */
     const canvas = document.getElementById('particleCanvas');
     const ctx = canvas.getContext('2d');
     let particles = [];
@@ -710,7 +710,7 @@
     }
     initParticles(); animateParticles();
 
-    /* ===== THEME & LANG (original, untouched) ===== */
+    /* ===== THEME & LANG ===== */
     function setTheme(theme) {
         const root = document.documentElement;
         document.getElementById('themeDeepSea').classList.remove('active');
@@ -758,7 +758,7 @@
         setTimeout(() => btn.innerText = "copy", 1500);
     }
 
-    /* ===== CHART LOGIC (original, untouched) ===== */
+    /* ===== CHART LOGIC ===== */
     let myChart = null;
     function renderRadar(currentMetrics, history = []) {
         const ctxChart = document.getElementById('threatChart').getContext('2d');
@@ -811,7 +811,7 @@
         });
     }
 
-    /* ===== ANALYZE (original, untouched) ===== */
+    /* ===== ANALYZE ===== */
     async function analyzeText() {
         const input = document.getElementById('userInput').value;
         const btn = document.getElementById('analyzeBtn');
@@ -944,7 +944,7 @@
         }
     }
 
-    /* ===== PDF DOWNLOAD (original, untouched) ===== */
+    /* ===== PDF DOWNLOAD ===== */
     async function downloadPDF() {
         const { jsPDF } = window.jspdf;
 
