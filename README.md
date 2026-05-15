@@ -286,6 +286,7 @@ PhishX is more than a phishing detection tool. It is a proactive cybersecurity a
 * Simplify scam reporting
 * Improve digital safety accessibility
 By combining intelligent analysis with explainable insights and multilingual support, PhishX aims to make cybersecurity understandable and accessible for everyone.
-
+# License
+This project was developed for ZYNEX Hackathon 2026 by Team QUADRANOVA.
 # "Detect the scam before it detects you."
 ## PhishX — Team QUADRANOVA
