@@ -96,6 +96,7 @@ http://127.0.0.1:5000
 
 ## Visualization
 * Pentagon threat analysis graph
+The pentagonal representation enables users to visually interpret multiple phishing dimensions simultaneously in an intuitive manner.
 
 
 # Key Features
