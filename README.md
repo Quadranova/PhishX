@@ -63,7 +63,8 @@ Instead of simply telling users that something is dangerous, PhishX explains the
 # Demo
 
 A demonstration video showcasing the PhishX platform and its core workflows is available below.
-🎥 [Watch the PhishX Demo Video] https://drive.google.com/file/d/13FzW7yqSC3vCY2dKbARbHkY90reQmnCk/view?usp=sharing
+[Watch the PhishX Demo Video] 
+https://drive.google.com/file/d/13FzW7yqSC3vCY2dKbARbHkY90reQmnCk/view?usp=sharing
 
 # Sample Scam Inputs
 PhishX can analyse different types of suspicious content, including:
@@ -98,23 +99,23 @@ http://secure-bank-verification.in
 
 
 # Installation/Setup
-## Clone the Repository
+### Clone the Repository
 ```bash
 git clone https://github.com/QUADRANOVA/PhishX.git
 cd phishx
 ```
-## Install Dependencies
+### Install Dependencies
 ```bash
 pip install -r requirements.txt
 ```
-## Configure API Key
+### Configure API Key
 Open `app.py` and replace:
 ```python
 GEMINI_API_KEY = "ADD YOUR GEMINI API KEY HERE"
 ```
 with your actual Gemini API key.
 
-## Run the Application
+### Run the Application
 ```bash
 python app.py
 ```
@@ -125,32 +126,27 @@ http://127.0.0.1:5000
 
 # Tech Stack
 
-## Frontend
+### Frontend
 - HTML5
 - CSS3
 - JavaScript
-
-## Backend
+### Backend
 - Python
 - Flask
-
-## AI & Analysis
+### AI & Analysis
 - Google Gemini API
 - OCR
 - Image Processing
-
-## Visualization
+### Visualization
 - Interactive Pentagon Threat Analysis Graph
-
-## Supporting Libraries
+### Supporting Libraries
 - Pillow
 - Python OCR libraries
 - Google Generative AI SDK
 
-
 # Key Features
 
-## 🔍 AI-Based Scam Analyzer
+## AI-Based Scam Analyzer
 
 PhishX analyses suspicious digital content such as:
 
@@ -242,11 +238,10 @@ Users can:
 This reduces the friction involved in reporting suspicious cyber incidents.
 
 # Additional Platform Modules
-##  Cybersecurity Awareness Modules
+## Cybersecurity Awareness Modules
+
 ## Scam Awareness Library
-
 Educational resources covering common scams such as:
-
 - UPI scams
 - OTP fraud
 - Fake job offers
@@ -257,15 +252,12 @@ Educational resources covering common scams such as:
 - Impersonation scams
 
 ## Training Lab
-
 A gamified learning environment where users can practise identifying suspicious and legitimate messages, earn XP, and improve their phishing awareness.
 
 ## Scam Encyclopedia
-
 A knowledge base explaining different scam categories, attack techniques, warning signs, and preventive measures.
 
 #  Multilingual Accessibility
-
 PhishX supports:
 - English
 - Hindi
@@ -278,9 +270,7 @@ The architecture can be extended to support additional Indian languages in futur
 <img width="1380" height="581" alt="WhatsApp Image 2026-05-13 at 15 22 34" src="https://github.com/user-attachments/assets/22d28899-0178-4f20-84d6-d059516cca16" />
 
 # Technology Vision
-
 PhishX follows an **Explainable AI for Cybersecurity** approach.
-
 The platform combines:
 
 - AI-powered analysis
@@ -309,9 +299,7 @@ The goal is to make cybersecurity assistance understandable and actionable for e
 | Scam knowledge base | ✅ |
 
 # Real-World Applications
-
 PhishX can be applied in:
-
 - Educational institutions
 - Digital literacy programs
 - Banking awareness initiatives
@@ -320,7 +308,6 @@ PhishX can be applied in:
 - Community awareness workshops
 
 ### Target Users
-
 - Students
 - Senior citizens
 - First-time internet users
@@ -329,7 +316,6 @@ PhishX can be applied in:
 - General smartphone users
 
 # Privacy & Security Considerations
-
 PhishX follows a privacy-conscious approach:
 
 - Uploaded screenshots are not intended for permanent storage
@@ -341,7 +327,6 @@ PhishX follows a privacy-conscious approach:
 Future versions can introduce stronger privacy controls, secure storage policies, and additional data-protection mechanisms.
 
 # Future Scope
-
 Future versions of PhishX can expand the platform with:
 
 - AI-based deepfake and manipulated-media detection
@@ -358,7 +343,6 @@ Future versions of PhishX can expand the platform with:
 These enhancements can evolve PhishX from a phishing analysis platform into a broader AI-powered digital fraud protection system.
 
 # Why PhishX Matters
-
 Cybersecurity tools should not only identify threats — they should help users understand and respond to them.
 
 PhishX bridges the gap between:
